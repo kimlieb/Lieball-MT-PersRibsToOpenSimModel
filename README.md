@@ -9,7 +9,7 @@ The workflow transforms generic OpenSim musculoskeletal models into patient-spec
 - Extracting patient-specific rib centerlines from EOS biplanar radiographs
 - Generating personalized 3D rib meshes
 - Adapting muscle attachment points to maintain anatomical relationships
-- Validating the integrated model through static optimization analysis
+- Verifying the transformation 
 
 ## Dependencies
 
@@ -33,11 +33,11 @@ pip install numpy scipy vtk xml matplotlib
 
 ```
 ├── RibGeneratorsPers/
-│   ├── SGM02_AisPipeline.m
 │   ├── preprocessing_moveRibCenterlines.m
 │   ├── createRibBodiesFromTranslatedEOSCenterlines.m
 │   └── rib_midline_extractor.py (modified)
 │   └── translated_centerlines_NewSegmentation.txt
+│   └── rib_centerlines_finalNewSegmentation.txt
 ├── GenericCenterline/
 │   ├── extract_genericCenterline_fromOBJ.py
 │   ├── extract_genericCenterline_fromVTP.py
@@ -52,8 +52,8 @@ pip install numpy scipy vtk xml matplotlib
 
 ### Step 1: Base Model Creation
 ```matlab
-% Create base MSK model with patient-specific spinal curvature
-SGM02_AisPipeline.m
+% Create base MSK model with patient-specific spinal curvature using tlsm and  mat2os repositories from BFH GitLab
+run via SGM02_AisPipeline.m of devBranchPhilippe from BFH GitLab
 ```
 **Output**: Base model `SGM02.osim` and `geometry/` folder with generic rib files
 
@@ -73,16 +73,23 @@ python extract_genericCenterline_fromVTP.py
 
 **Important**: This step requires Tim Schär's repository.
 
-1. Clone Tim's 3D-Ribcage-Reconstructor: https://github.com/schaertim/3D-Ribcage-Reconstructor
-2. Place EOS images (`flipped_flipped_EE3D0C8B.nii`, `flipped_flipped_EEF0A0A1.nii`) in appropriate folders
+1. Clone Tim's 3D-Ribcage-Reconstructor:  https://github.com/schaertim/3D-Ribcage-Reconstructor
+2. Create predicted segmentations of EOS images
 3. Manually refine provided segmentation predictions in 3D Slicer
-4. Use the modified `rib_midline_extractor.py` (includes added export function)
-5. Run the main script:
+4. 2. Place binaly labelmap files of the segmentations in appropriate folders
+5. Use the modified `rib_midline_extractor.py` (includes added export function)
+6. Add the following lines to the main script
+   ```python
+   p# Export centerlines
+    centerlineFileName = "rib_centerlines_finalNewSegmentation.txt";
+    extractorMidline.export_3d_midlines_as_txt(centerlineFileName)
+   ```
+8. Run the main script:
    ```python
    python main.py
    ```
 
-**Output**: Patient centerline data in format:
+**Output**: Patient centerline data with format:
 ```
 rib_index,side,point_index,x,y,z
 ```
@@ -98,7 +105,7 @@ preprocessing_moveRibCenterlines.m
 ```
 - Translates centerlines to local coordinate system (origin at 0,0,0)
 - Includes quality verification and visual inspection plots
-- **Output**: Translated centerline data
+- **Output**: Translated centerline data txt file 
 
 ### Step 5: 3D Rib Mesh Generation
 ```matlab
@@ -114,6 +121,7 @@ createRibBodiesFromTranslatedEOSCenterlines.m
 - `n_spline_points`: Number of spline points
 - `n_cross_points`: Circumferential points per cross-section
 - `rib_width`, `rib_height`: Cross-section dimensions
+- translated centerline file name if changed
 
 **Output**: Personalized rib meshes named `[rib_number][R/L]_pers.obj`
 
@@ -129,12 +137,12 @@ PersonaliseRibsAndMusclePP.m
 2. Compute transformations from generic to personalized geometry  
 3. Calculate new muscle positions using relative position method:
    ```
-   P_pers = C_pers + v⃗
+   P_pers = C_pers + v
    ```
    Where:
    - `P_pers`: New muscle attachment point
    - `C_pers`: Corresponding point on personalized centerline
-   - `v⃗`: Offset vector from generic centerline
+   - `v`: Offset vector from generic centerline
 
 4. Update model with personalized muscle attachments
 5. Replace generic rib meshes with patient-specific meshes
@@ -145,7 +153,7 @@ PersonaliseRibsAndMusclePP.m
 - Final personalized model (updated muscle points + personalized meshes)
 
 ### Step 7: Model Validation
-Perform static optimization in OpenSim to compare:
+Perform static optimization and joint reaction analysis in OpenSim to compare:
 - Muscle activation patterns between base and personalized models
 - Joint reaction forces during neutral standing posture
 - Analysis over 1-second duration (11 time points)
@@ -193,37 +201,18 @@ PersonaliseRibsAndMusclePP.m
 - Height: 1.65m, Weight: 45kg
 - Treatment: Physiotherapy and bracing
 
-## Troubleshooting
 
-### Common Issues:
-1. **OpenSim API failures**: Automatic fallback to XML parsing implemented
-2. **Centerline misalignment**: Verification and correction included
-3. **Missing dependencies**: Check MATLAB packages and Python libraries
-4. **Mesh generation errors**: Comprehensive validation checks included
-
-### Verification Steps:
-- Confirm centerline origins at (0,0,0) after preprocessing
-- Check muscle path point transformations in verification plots  
-- Validate rib-spine alignment in OpenSim GUI
-- Compare muscle group visualizations between base and final models
 
 ## Citation and Acknowledgments
 
 **Base Components**:
 - MSK model adapted from Schmid et al. (2020)
 - Spine alignment from Cedric Rauber (2022) 
-- **EOS segmentation and 3D reconstruction**: Tim Schär (2025)
-
-**Tim Schär's Repository**: https://github.com/schaertim/3D-Ribcage-Reconstructor
-
+- **EOS segmentation and 3D reconstruction**: Tim Schär (2025) https://github.com/schaertim/3D-Ribcage-Reconstructor
 **Key Modification**: Added `export_3d_midlines_as_txt()` function to `rib_midline_extractor.py` for centerline data export.
 
-## License
-
-[Add your license information here]
 
 ## Contact
 
-[Add your contact information here]
+For any questions, feel free to reach out
 
-For questions about EOS segmentation components, refer to: https://github.com/schaertim/3D-Ribcage-Reconstructor
