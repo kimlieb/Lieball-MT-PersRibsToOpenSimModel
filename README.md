@@ -39,9 +39,8 @@ pip install numpy scipy vtk xml matplotlib
 │   └── translated_centerlines_NewSegmentation.txt
 │   └── rib_centerlines_finalNewSegmentation.txt
 ├── GenericCenterline/
-│   ├── extract_genericCenterline_fromOBJ.py
 │   ├── extract_genericCenterline_fromVTP.py
-│   └── generic_rib_centerlines/
+│   └── generic_rib_centerlinesFromVTP/
 ├── RibPersonalisationImplementation/
 │   └── rib_personalizer_functions/
 │   └── PersonaliseRibsAndMusclePP.m
