@@ -32,20 +32,19 @@ pip install numpy scipy vtk xml matplotlib
 ## Repository Structure
 
 ```
-├── matlab_scripts/
+├── RibGeneratorsPers/
 │   ├── SGM02_AisPipeline.m
 │   ├── preprocessing_moveRibCenterlines.m
 │   ├── createRibBodiesFromTranslatedEOSCenterlines.m
-│   └── PersonaliseRibsAndMusclePP.m
-├── python_scripts/
+│   └── rib_midline_extractor.py (modified)
+│   └── translated_centerlines_NewSegmentation.txt
+├── GenericCenterline/
 │   ├── extract_genericCenterline_fromOBJ.py
 │   ├── extract_genericCenterline_fromVTP.py
-│   └── rib_midline_extractor.py (modified)
-├── data/
-│   ├── ProcessedData_Method4_SGM02
-│   └── example_centerline_data/
-├── geometry/
-│   └── generic_rib_files/
+│   └── generic_rib_centerlines/
+├── RibPersonalisationImplementation/
+│   └── rib_personalizer_functions/
+│   └── PersonaliseRibsAndMusclePP.m
 └── README.md
 ```
 
